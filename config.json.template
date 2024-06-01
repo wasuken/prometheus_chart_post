@@ -1,0 +1,6 @@
+{
+  "prometheus_url": "",
+  "chart_png_path": "./chart.png",
+  "query": "node_cpu_seconds_total",
+  "webhook_url": ""
+}
