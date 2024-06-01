@@ -288,7 +288,7 @@ def send_chart_png_to_discord(config_path):
 if __name__ == '__main__':
     # Prometheusのエンドポイントとクエリ
     if len(sys.argv) <= 0:
-        print("Usage: python send_chart_png_to_discord.py <config_file>"))
+        print("Usage: python send_chart_png_to_discord.py <config_file>")
         return
     config_file = sys.argv[1]
     send_chart_png_to_discord(config_file)
