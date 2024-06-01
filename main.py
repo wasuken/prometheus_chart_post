@@ -5,6 +5,7 @@ from matplotlib.dates import DateFormatter
 from discord import SyncWebhook, File
 from datetime import datetime, timedelta
 import json
+import sys
 
 
 def read_config(config_file):
@@ -284,6 +285,10 @@ def send_chart_png_to_discord(config_path):
         send_file_to_discord(config['webhook_url'], f'/tmp/chart_{opt}.png', f"Here is the {opt} usage chart")
 
 
-# Prometheusのエンドポイントとクエリ
-config_file = "config.json"
-send_chart_png_to_discord(config_file)
+if __name__ == '__main__':
+    # Prometheusのエンドポイントとクエリ
+    if len(sys.argv) <= 0:
+        print("Usage: python send_chart_png_to_discord.py <config_file>"))
+        return
+    config_file = sys.argv[1]
+    send_chart_png_to_discord(config_file)
