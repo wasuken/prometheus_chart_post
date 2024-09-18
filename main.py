@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -269,6 +270,23 @@ def send_file_to_discord(webhook_url, chart_png_path, title):
     with open(chart_png_path, "rb") as f:
         webhook.send(title, file=File(f, chart_png_path))
 
+def get_disk_usage():
+    # ディスクの使用状況を取得
+    disk_usage = os.popen("df -h --output=source,pcent").read().strip().split("\n")[1:]
+    usage_report = []
+
+    # 除外するデバイスのリスト
+    excluded_devices = ["tmpfs", "run", "efivarfs", "dev"]
+
+    for line in disk_usage:
+        if line:
+            device, usage = line.split()
+            # 完全一致で除外
+            if not any(device == excluded for excluded in excluded_devices):
+                usage_report.append(f"{device}: {usage.strip()}")
+
+    return "Disk usage: \n".join(usage_report) if usage_report else "No relevant disk usage found."
+
 
 def send_chart_png_to_discord(config_path):
     start_timestamp, end_timestamp = get_yesterday_timestamps()
@@ -279,7 +297,8 @@ def send_chart_png_to_discord(config_path):
         "end": end_timestamp,
         "step": "14",
     }
-    for opt in ["cpu", "memory", "network", "disk"]:
+    # for opt in ["cpu", "memory", "network", "disk"]:
+    for opt in ["cpu", "memory", "network"]:
         print(f"## {opt} ##")
         generate_chart_png(opt, config, start_timestamp, end_timestamp)
         send_file_to_discord(config['webhook_url'], f'/tmp/chart_{opt}.png', f"Here is the {opt} usage chart")
@@ -292,3 +311,8 @@ if __name__ == '__main__':
         exit()
     config_file = sys.argv[1]
     send_chart_png_to_discord(config_file)
+    # disk情報
+    config = read_config(config_file)
+    disku_text = get_disk_usage()
+    webhook = SyncWebhook.from_url(config['webhook_url'])
+    webhook.send(disku_text)
